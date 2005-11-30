@@ -1,24 +1,24 @@
-#ifndef __POP3_H
-#define __POP3_H
+#ifndef __IMAP4_H
+#define __IMAP4_H
 #include <stdio.h>
-enum pop3_state {p3Dead, p3Authorisation, p3Transaction, p3Update, p3EndMarker};
+enum imap4_state {p3Dead, p3Authorisation, p3Transaction, p3Update, p3EndMarker};
 
 #define BIT(a) (1<<(a))
-#define ALL_POP3_STATES BIT(p3EndMarker)-1
+#define ALL_IMAP4_STATES BIT(p3EndMarker)-1
 
-enum pop3_state command_loop(FILE *ifp, FILE *ofp, enum pop3_state current_state);
+enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_state);
 int handle_connection(FILE *ifp, FILE *ofp);
 int _send_misc(FILE *ofp, char *prefix, char *message, char *extended_code);
 
-#define POP3_SUCCESS "+OK"
-#define POP3_FAILURE "-ERR"
+#define IMAP4_SUCCESS "+OK"
+#define IMAP4_FAILURE "-ERR"
 
-#define _send_ERR(ofp, message, extended_error) _send_misc(ofp, POP3_FAILURE, message, extended_error)
-#define _send_OK(ofp, message) _send_misc(ofp, POP3_SUCCESS, message, NULL)
+#define _send_ERR(ofp, message, extended_error) _send_misc(ofp, IMAP4_FAILURE, message, extended_error)
+#define _send_OK(ofp, message) _send_misc(ofp, IMAP4_SUCCESS, message, NULL)
 
 #define DEFAULT_PORT htons(110)
 
-// POP3 extended error codes follow.
+// IMAP4 extended error codes follow.
 #define P3EXT_LOGIN_DELAY "LOGIN-DELAY"
 #define P3EXT_IN_USE "IN-USE"
 
@@ -60,14 +60,14 @@ char super_chomp_n(char *, unsigned long int);
 
 
 /*
- * _pop3_fprintf(fp, format, ...)
+ * _imap4_fprintf(fp, format, ...)
  *
  * Wraps around fprintf, with the exceptions that:
  * - it guarantees no more than 512 characters will be written
  * - it guarantees that it will end with \r\n
  *
  */
-int _pop3_fprintf(FILE *out, char const *format, ...);
+int _imap4_fprintf(FILE *out, char const *format, ...);
 
 /*
  * hex_from_binary(out_string, in_string, bytes)

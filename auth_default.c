@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "pop3.h"
+#include "imap4.h"
 #include "auth_functions.h"
 
 char _default_auth_need_root() {return 0;}

@@ -16,7 +16,7 @@
 #include <syslog.h>
 #include <stdarg.h>
 
-#include "pop3.h"
+#include "imap4.h"
 #include "net.h"
 
 
@@ -25,7 +25,7 @@
 If rendezvous (aka zeroconf) support exists:
 
 bind to a wild port if 110 isn't possible
-register in multicast DNS "<hostname>._pop3._tcp.local IN SRV <self address>:<port>"
+register in multicast DNS "<hostname>._imap4._tcp.local IN SRV <self address>:<port>"
 
 */
 
@@ -116,7 +116,7 @@ int net_server_start(bool su_after_bind, bool detach_after_bind) {
 	addrhints.ai_family=PF_UNSPEC;
 	addrhints.ai_socktype=SOCK_STREAM; // We only want stream-capable services
 	//addrhints.ai_flags=AI_PASSIVE;
-	rv=getaddrinfo(NULL, "pop3", &addrhints, &first_addrinfo_result);
+	rv=getaddrinfo(NULL, "imap4", &addrhints, &first_addrinfo_result);
 	if(rv!=0) {
 		// gai_strerror(error);
 		return 0;
@@ -200,7 +200,7 @@ int net_server_start(bool su_after_bind, bool detach_after_bind) {
 			printf("Using port: %i\n", using_port);
 			if(using_port && ! used_rendezvous) {
 				dnssd_err=DNSServiceRegister( &sdRef, 0, 0,
-					NULL, "_pop3._tcp", NULL,
+					NULL, "_imap4._tcp", NULL,
 					NULL, using_port, 0, NULL, NULL, NULL); 
 				if(dnssd_err==kDNSServiceErr_NoError) used_rendezvous=1;
 			}

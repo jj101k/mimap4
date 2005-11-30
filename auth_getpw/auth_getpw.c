@@ -9,7 +9,7 @@ And even then not on all UNIXes in all situations (it doesn't work on Mac OS X f
 #include <sys/types.h>
 #include <pwd.h>
 #include <unistd.h>
-#include "pop3.h"
+#include "imap4.h"
 
 char const *_auth_timestamp() {return NULL;} // Can't support APOP
 

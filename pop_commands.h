@@ -1,21 +1,21 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "pop3.h"
+#include "imap4.h"
 
 #include "storage_functions.h"
 
-struct pop3_command_rv {
+struct imap4_command_rv {
 	int successful;
 	char response_already_sent;
 	char *extra_string;
 	char *extended_error_code;
 };
 
-extern struct pop3_command_rv pop3_rv_misc_success, pop3_rv_misc_failure, pop3_rv_quiet_success, pop3_rv_quiet_failure, pop3_rv_invalid, pop3_rv_badargs;
+extern struct imap4_command_rv imap4_rv_misc_success, imap4_rv_misc_failure, imap4_rv_quiet_success, imap4_rv_quiet_failure, imap4_rv_invalid, imap4_rv_badargs;
 
 struct popcommand {
 	char *name;
-	struct pop3_command_rv (*function)(int, char *[], enum pop3_state *, FILE *, FILE *);
+	struct imap4_command_rv (*function)(int, char *[], enum imap4_state *, FILE *, FILE *);
 	unsigned int min_argc;
 	unsigned int max_argc;
 	unsigned int valid_states;
@@ -27,20 +27,20 @@ struct popcommand {
 // opt/trans: top uidl 
 // opt/auth: user* pass* apop*
 
-#define DEFINE_POP3(cmd) struct pop3_command_rv cmd(int, char *[], enum pop3_state *, FILE *, FILE *)
+#define DEFINE_IMAP4(cmd) struct imap4_command_rv cmd(int, char *[], enum imap4_state *, FILE *, FILE *)
 
-DEFINE_POP3(pop3_CAPA);
+DEFINE_IMAP4(imap4_CAPA);
 
-DEFINE_POP3(pop3_USERPASS);
-DEFINE_POP3(pop3_APOP);
-DEFINE_POP3(pop3_NOOP);
-DEFINE_POP3(pop3_STAT);
-DEFINE_POP3(pop3_LIST);
-DEFINE_POP3(pop3_UIDL);
-DEFINE_POP3(pop3_RETR);
-DEFINE_POP3(pop3_TOP);
-DEFINE_POP3(pop3_DELE);
-DEFINE_POP3(pop3_RSET);
-DEFINE_POP3(pop3_QUIT);
+DEFINE_IMAP4(imap4_USERPASS);
+DEFINE_IMAP4(imap4_APOP);
+DEFINE_IMAP4(imap4_NOOP);
+DEFINE_IMAP4(imap4_STAT);
+DEFINE_IMAP4(imap4_LIST);
+DEFINE_IMAP4(imap4_UIDL);
+DEFINE_IMAP4(imap4_RETR);
+DEFINE_IMAP4(imap4_TOP);
+DEFINE_IMAP4(imap4_DELE);
+DEFINE_IMAP4(imap4_RSET);
+DEFINE_IMAP4(imap4_QUIT);
 
-extern struct popcommand pop3_commands[];
+extern struct popcommand imap4_commands[];

@@ -1,6 +1,6 @@
 include defaults.mk
-TARGET=mpop3
-OBJECTS=main.o storage_default.o pop_commands.o pop3.o util.o modules.o auth_default.o parse_conffile.o net.o
+TARGET=mimap4
+OBJECTS=main.o storage_default.o pop_commands.o imap4.o util.o modules.o auth_default.o parse_conffile.o net.o
 ALSO_CLEAN=.gdb_history parse_conffile.c rendezvous_test_prog $(TARGET).conf test-$(TARGET).conf
 SUBDIRS=auth_file storage_mbox auth_getpw @extra_modules@
 AWK=@AWK@
@@ -51,7 +51,7 @@ test-$(TARGET).conf: conf.test
 
 test: all test-$(TARGET).conf
 	(cd spools; $(MAKE) -I .. all)
-	./mpop3 -s -f test-$(TARGET).conf < test.input | $(AWK) '{status=$$1} END {if(status=="+OK") {print "Ok"} else {print "Failed"; exit 1}}'
+	./mimap4 -s -f test-$(TARGET).conf < test.input | $(AWK) '{status=$$1} END {if(status=="+OK") {print "Ok"} else {print "Failed"; exit 1}}'
 
 dist: distclean
 	( cd .. ; pwd;  mkdir @PACKAGE_NAME@-@PACKAGE_VERSION@ ; cp -R @PACKAGE_NAME@/* @PACKAGE_NAME@-@PACKAGE_VERSION@ ; tar cvzf @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.gz @PACKAGE_NAME@-@PACKAGE_VERSION@ )

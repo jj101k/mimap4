@@ -18,7 +18,7 @@ void handle_browse_reply(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t in
 
 int main() {
 	DNSServiceRef sdRef;
-	DNSServiceErrorType err=DNSServiceBrowse(&sdRef, 0, 0, "_pop3._tcp", NULL, handle_browse_reply, NULL); 
+	DNSServiceErrorType err=DNSServiceBrowse(&sdRef, 0, 0, "_imap4._tcp", NULL, handle_browse_reply, NULL); 
 
 	if(err==kDNSServiceErr_NoError) {
 		DNSServiceProcessResult(sdRef);

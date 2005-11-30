@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "pop3.h"
+#include "imap4.h"
 #include "modules.h"
 #include "parse_conffile.h"
 #include "net.h"

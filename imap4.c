@@ -6,11 +6,11 @@
 #include "auth_functions.h"
 #include "pop_commands.h"
 #include "strings.h"
-#include "pop3.h"
+#include "imap4.h"
 
 // This is a vaguely sensible max
 // more practically, this/2 would be okay.
-#define MAX_POP3_ARG_COUNT RFC_MAX_INPUT_LENGTH
+#define MAX_IMAP4_ARG_COUNT RFC_MAX_INPUT_LENGTH
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -41,7 +41,7 @@ void drop_privs() {
 
 
 #include <stdarg.h>
-int _pop3_fprintf(FILE *out, char const *format, ...) {
+int _imap4_fprintf(FILE *out, char const *format, ...) {
 	va_list ap;
 	int rv;
 	char *buff=malloc(RFC_MAX_OUTPUT_LENGTH+1);
@@ -60,12 +60,12 @@ int _pop3_fprintf(FILE *out, char const *format, ...) {
 int _send_misc(FILE *ofp, char *prefix, char *message, char *extended_error) {
 	if(message) {
 		if(extended_error) {
-			return _pop3_fprintf(ofp, "%s [%s] %s\r\n", prefix, extended_error, message);
+			return _imap4_fprintf(ofp, "%s [%s] %s\r\n", prefix, extended_error, message);
 		} else {
-			return _pop3_fprintf(ofp, "%s %s\r\n", prefix, message);
+			return _imap4_fprintf(ofp, "%s %s\r\n", prefix, message);
 		}
 	} else {
-		return _pop3_fprintf(ofp, "%s\r\n", prefix);
+		return _imap4_fprintf(ofp, "%s\r\n", prefix);
 	}
 }
 
@@ -86,15 +86,15 @@ void handle_sigalarm(int signum) {
 	exit(0);
 }
 
-enum pop3_state command_loop(FILE *ifp, FILE *ofp, enum pop3_state current_state) {
+enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_state) {
 	char command_line[RFC_MAX_INPUT_LENGTH];
 	static char previous_command_line[RFC_MAX_INPUT_LENGTH]="";
-	char *argv[MAX_POP3_ARG_COUNT];
+	char *argv[MAX_IMAP4_ARG_COUNT];
 	unsigned int argc=0;
 	char *cursor;
 	int i;
-	struct pop3_command_rv pop3_command_rv;
-	static struct pop3_command_rv previous_pop3_command_rv={1,0,NULL};
+	struct imap4_command_rv imap4_command_rv;
+	static struct imap4_command_rv previous_imap4_command_rv={1,0,NULL};
 
 	{
 		sigalarm_out=ofp;
@@ -118,30 +118,30 @@ enum pop3_state command_loop(FILE *ifp, FILE *ofp, enum pop3_state current_state
 			return current_state;
 		}
 	}
-	pop3_command_rv=pop3_rv_invalid;
+	imap4_command_rv=imap4_rv_invalid;
 	char bad_command_args=0;
-	for(i=0;pop3_commands[i].name;i++) {
-		if(! ( pop3_commands[i].valid_states & BIT(current_state) ) ) continue;
-		if(!strcasecmp(pop3_commands[i].name, argv[0])) {
+	for(i=0;imap4_commands[i].name;i++) {
+		if(! ( imap4_commands[i].valid_states & BIT(current_state) ) ) continue;
+		if(!strcasecmp(imap4_commands[i].name, argv[0])) {
 			int do_command=0;
 
-			if(argc-1 < pop3_commands[i].min_argc || argc-1 > pop3_commands[i].max_argc) {
+			if(argc-1 < imap4_commands[i].min_argc || argc-1 > imap4_commands[i].max_argc) {
 				bad_command_args=1;
-			} else if(pop3_commands[i].valid_after_failed) {
+			} else if(imap4_commands[i].valid_after_failed) {
 				if(!previous_command_line[0]) {
 					// empty line??
 					do_command=1;
-				} else if(previous_pop3_command_rv.successful) {
+				} else if(previous_imap4_command_rv.successful) {
 					do_command=0;
-				} else if(grep_equal(previous_command_line, pop3_commands[i].valid_after_failed)) {
+				} else if(grep_equal(previous_command_line, imap4_commands[i].valid_after_failed)) {
 					do_command=1;
 				} else {
 					do_command=0;
 				}
-			} else if(pop3_commands[i].valid_after_successful) {
-				if(!previous_pop3_command_rv.successful) {
+			} else if(imap4_commands[i].valid_after_successful) {
+				if(!previous_imap4_command_rv.successful) {
 					do_command=0;
-				} else if(grep_equal(previous_command_line, pop3_commands[i].valid_after_successful)) {
+				} else if(grep_equal(previous_command_line, imap4_commands[i].valid_after_successful)) {
 					do_command=1;
 				} else {
 					do_command=0;
@@ -150,39 +150,39 @@ enum pop3_state command_loop(FILE *ifp, FILE *ofp, enum pop3_state current_state
 				do_command=1;
 			}
 			if(do_command) {
-				pop3_command_rv=(*(pop3_commands[i].function))(argc, argv, &current_state, ifp, ofp);
+				imap4_command_rv=(*(imap4_commands[i].function))(argc, argv, &current_state, ifp, ofp);
 			} else if(bad_command_args) {
-				pop3_command_rv=pop3_rv_badargs;
+				imap4_command_rv=imap4_rv_badargs;
 			} else {
-				pop3_command_rv=pop3_rv_invalid;
+				imap4_command_rv=imap4_rv_invalid;
 			}
 			break;
 		}
 	}
 	strncpy(previous_command_line, command_line, sizeof(previous_command_line));
-	previous_pop3_command_rv=pop3_command_rv;
+	previous_imap4_command_rv=imap4_command_rv;
 
-	if(!pop3_command_rv.response_already_sent) {
-		if(pop3_command_rv.successful) {
-			_send_OK(ofp, pop3_command_rv.extra_string);
+	if(!imap4_command_rv.response_already_sent) {
+		if(imap4_command_rv.successful) {
+			_send_OK(ofp, imap4_command_rv.extra_string);
 		} else {
-			_send_ERR(ofp, pop3_command_rv.extra_string, pop3_command_rv.extended_error_code);
+			_send_ERR(ofp, imap4_command_rv.extra_string, imap4_command_rv.extended_error_code);
 		}
 	}
 	return current_state;
 }
 
 int handle_connection(FILE *ifp, FILE *ofp) {
-	enum pop3_state current_state=p3Authorisation;
+	enum imap4_state current_state=p3Authorisation;
 #ifdef USE_OPENSSL
 	char const *ts=_auth_timestamp();
 	if(ts) {
-		_pop3_fprintf(ofp, POP3_SUCCESS " %s %s\r\n", S_SERVER_ID, ts);
+		_imap4_fprintf(ofp, IMAP4_SUCCESS " %s %s\r\n", S_SERVER_ID, ts);
 	} else {
-		_pop3_fprintf(ofp, POP3_SUCCESS " %s\r\n", S_SERVER_ID);
+		_imap4_fprintf(ofp, IMAP4_SUCCESS " %s\r\n", S_SERVER_ID);
 	}
 #else
-	_pop3_fprintf(ofp, POP3_SUCCESS " %s\r\n", S_SERVER_ID);
+	_imap4_fprintf(ofp, IMAP4_SUCCESS " %s\r\n", S_SERVER_ID);
 #endif
 	while(1) {
 		current_state=command_loop(ifp, ofp, current_state);

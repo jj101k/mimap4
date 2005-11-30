@@ -5,7 +5,7 @@
 #include <string.h>
 #include <syslog.h>
 #include <stdarg.h>
-#include "pop3.h"
+#include "imap4.h"
 #include "storage.h"
 #include "conffile.h"
 
@@ -57,14 +57,14 @@ int _storage_uidl_supported() {return USE_OPENSSL;}
 
 #define IS_MESSAGE_START_LINE(line) (strncmp("From ", line, 5)==0)
 
-struct pop3_message * first_message;
+struct imap4_message * first_message;
 unsigned long int message_count;
 unsigned long int total_size;
 unsigned long int total_spool_size;
 
 int cache_metadata() {
 	char in_body=0, started=0;
-	struct pop3_message * current_message=NULL;
+	struct imap4_message * current_message=NULL;
 	spoolfp=fdopen(spoolfd, "r");
 	char current_line[RFC_MAX_OUTPUT_LENGTH];
 	unsigned long int current_offset=0;
@@ -85,7 +85,7 @@ int cache_metadata() {
 				rewind(spoolfp);
 				return 0;
 			} else {
-				first_message=calloc(1, sizeof(struct pop3_message));
+				first_message=calloc(1, sizeof(struct imap4_message));
 				message_count++;
 				first_message->header_offset=current_offset;
 				current_message=first_message;
@@ -98,7 +98,7 @@ int cache_metadata() {
 			in_body=0;
 			if(!current_message->header_end_offset) current_message->header_end_offset=current_offset;
 			current_message->body_end_offset=current_offset;
-			current_message->next=calloc(1, sizeof(struct pop3_message));
+			current_message->next=calloc(1, sizeof(struct imap4_message));
 			message_count++;
 			total_size+=current_message->size;
 #if USE_OPENSSL
@@ -219,10 +219,10 @@ int _storage_lock_mailbox(char const *mailboxname) {
 
 unsigned long int _storage_message_count() {return message_count;};
 unsigned long int _storage_message_sum() {return total_size;};
-struct pop3_message *_storage_first_message() {return first_message;};
+struct imap4_message *_storage_first_message() {return first_message;};
 int _storage_synch() {
 	char *spool_copy=malloc(total_spool_size);
-	struct pop3_message *current_message;
+	struct imap4_message *current_message;
 	unsigned long byte_pos=0;
 	unsigned long to_read;
 

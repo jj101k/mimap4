@@ -1,7 +1,7 @@
-MPOP3 - a modular POP3 server
+MIMAP4 - a modular IMAP4 server
 =============================
 
-This program is a modular POP3 implementation, meaning that it supports different authentication/storage modules loadable at runtime. At the moment, I only have four, and the default config file (mpop3.conf) loads two of them by default: auth_file and storage_mbox.
+This program is a modular IMAP4 implementation, meaning that it supports different authentication/storage modules loadable at runtime. At the moment, I only have four, and the default config file (mimap4.conf) loads two of them by default: auth_file and storage_mbox.
 
 
 AUTH MODULES
@@ -54,7 +54,7 @@ NOTES
 = Can handle NULLs (^v000) in mail spools
 = Can handle varied line endings in a mail spool (\n or \r\n... but fgets()/fgetln() unfortunately won't break on \r alone)
 = Can do APOP where appropriate
-= Supports extended POP3 response codes
+= Supports extended IMAP4 response codes
 = Supports CAPA
 = Supports UIDL where appropriate
 

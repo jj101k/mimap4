@@ -7,4 +7,4 @@ defaults.mk
 module.mk
 *.conf
 spools/test
-mpop3
+mimap4

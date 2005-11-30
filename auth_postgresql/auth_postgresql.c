@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "pop3.h"
+#include "imap4.h"
 #include "conffile.h"
 
 #include <libpq-fe.h>

@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 
-struct pop3_message {
-	struct pop3_message * next;
+struct imap4_message {
+	struct imap4_message * next;
 	char *uidl;
 	// This is the size it will be on output, with all newlines normalised to \r\n
 	unsigned long int size;
