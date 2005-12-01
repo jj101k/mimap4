@@ -116,7 +116,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 		}
 	}
 	if(argc<=1) {
-		_send_ERR(ofp, E_PROTOCOL_ERROR, NULL);
+		_send_misc(ofp, argv[0], IMAP4_BAD, E_PROTOCOL_ERROR);
 		return current_state;
 	}
 	argc--;

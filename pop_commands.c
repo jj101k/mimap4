@@ -17,7 +17,7 @@
 struct imap4_command_rv
 	imap4_rv_misc_success={IMAP4_OK, 0, NULL, NULL}, 							imap4_rv_misc_failure={IMAP4_BAD, 0, NULL, NULL},
 	imap4_rv_quiet_success={IMAP4_OK, 1, NULL, NULL}, 						imap4_rv_quiet_failure={IMAP4_BAD, 1, NULL, NULL},
-	imap4_rv_invalid={IMAP4_NO, 0, E_INVALID_COMMAND, NULL}, 			imap4_rv_badargs={IMAP4_BAD, 0, E_BAD_ARGUMENTS},
+	imap4_rv_invalid={IMAP4_BAD, 0, E_INVALID_COMMAND, NULL}, 			imap4_rv_badargs={IMAP4_BAD, 0, E_BAD_ARGUMENTS},
 
 	imap4_rv_login_success={IMAP4_OK, 0, S_LOGIN_SUCCESS, NULL}, 	imap4_rv_user_success={IMAP4_OK, 0, S_USER_SUCCESS, NULL},
 
