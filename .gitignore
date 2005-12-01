@@ -8,3 +8,4 @@ module.mk
 *.conf
 spools/test
 mimap4
+.gdb_history
