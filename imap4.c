@@ -174,16 +174,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 
 int handle_connection(FILE *ifp, FILE *ofp) {
 	enum imap4_state current_state=p3Authorisation;
-#ifdef USE_OPENSSL
-	char const *ts=_auth_timestamp();
-	if(ts) {
-		_imap4_fprintf(ofp, IMAP4_SUCCESS " %s %s\r\n", S_SERVER_ID, ts);
-	} else {
-		_imap4_fprintf(ofp, IMAP4_SUCCESS " %s\r\n", S_SERVER_ID);
-	}
-#else
-	_imap4_fprintf(ofp, IMAP4_SUCCESS " %s\r\n", S_SERVER_ID);
-#endif
+	_imap4_fprintf(ofp, "* " IMAP4_SUCCESS " %s\r\n", S_SERVER_ID);
 	while(1) {
 		current_state=command_loop(ifp, ofp, current_state);
 		if(current_state == p3Dead) {

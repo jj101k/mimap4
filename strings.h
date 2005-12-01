@@ -12,7 +12,7 @@
 #define E_TIMEOUT "you've been idle too long. Disconnecting."
 
 // According to RFC2449, this must be 'printable ASCII, excluding "<"'
-#define S_SERVER_ID "IMAP4 server ready"
+#define S_SERVER_ID "IMAP4rev1 server ready"
 #define S_LIST_FOLLOWS "Scan listing follows"
 #define S_MESSAGE_FOLLOWS "message follows"
 #define S_MESSAGE_DELETED "message deleted"

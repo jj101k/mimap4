@@ -51,7 +51,7 @@ test-$(TARGET).conf: conf.test
 
 test: all test-$(TARGET).conf
 	(cd spools; $(MAKE) -I .. all)
-	./mimap4 -s -f test-$(TARGET).conf < test.input | $(AWK) '{status=$$1} END {if(status=="+OK") {print "Ok"} else {print "Failed"; exit 1}}'
+	./mimap4 -s -f test-$(TARGET).conf < test.input | $(AWK) '{status=$$2} END {if(status=="OK") {print "Ok"} else {print "Failed"; exit 1}}'
 
 dist: distclean
 	( cd .. ; pwd;  mkdir @PACKAGE_NAME@-@PACKAGE_VERSION@ ; cp -R @PACKAGE_NAME@/* @PACKAGE_NAME@-@PACKAGE_VERSION@ ; tar cvzf @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.gz @PACKAGE_NAME@-@PACKAGE_VERSION@ )

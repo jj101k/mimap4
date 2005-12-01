@@ -10,8 +10,8 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 int handle_connection(FILE *ifp, FILE *ofp);
 int _send_misc(FILE *ofp, char *prefix, char *message, char *extended_code);
 
-#define IMAP4_SUCCESS "+OK"
-#define IMAP4_FAILURE "-ERR"
+#define IMAP4_SUCCESS "OK"
+#define IMAP4_FAILURE "BAD"
 
 #define _send_ERR(ofp, message, extended_error) _send_misc(ofp, IMAP4_FAILURE, message, extended_error)
 #define _send_OK(ofp, message) _send_misc(ofp, IMAP4_SUCCESS, message, NULL)
