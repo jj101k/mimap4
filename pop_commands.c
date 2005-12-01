@@ -66,7 +66,7 @@ struct imap4_message * valid_message(unsigned long int index) {
 }
 
 /*
- * struct imap4_command_rv imap4_DELE(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_DELE(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
  *
  * Syntax: DELE <message number>
  *
@@ -74,7 +74,7 @@ struct imap4_message * valid_message(unsigned long int index) {
  */
 struct imap4_command_rv imap4_rv_message_deleted={IMAP4_OK, 0, S_MESSAGE_DELETED, NULL};
 
-struct imap4_command_rv imap4_DELE(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_DELE(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	struct imap4_message *current_message;
 	unsigned long int index;
 	
@@ -89,13 +89,13 @@ struct imap4_command_rv imap4_DELE(int argc, char *argv[], enum imap4_state *unu
 }
 
 /*
- * struct imap4_command_rv imap4_RETR(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_RETR(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
  *
  * Syntax: RETR <message number>
  *
  * Outputs the message in question, byte-stuffed and LF-converted as appropriate.
  */
-struct imap4_command_rv imap4_RETR(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_RETR(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	struct imap4_message *current_message;
 	unsigned long int index;
 	
@@ -113,13 +113,13 @@ struct imap4_command_rv imap4_RETR(int argc, char *argv[], enum imap4_state *unu
 }
 
 /*
- * struct imap4_command_rv imap4_TOP(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_TOP(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
  *
  * Syntax: TOP <message number> <line count>
  *
  * As RETR, but only outputs the body plus the first <line count> lines of the body.
  */
-struct imap4_command_rv imap4_TOP(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_TOP(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	struct imap4_message *current_message;
 	unsigned long int index;
 	unsigned long int max_lines;
@@ -141,13 +141,13 @@ struct imap4_command_rv imap4_TOP(int argc, char *argv[], enum imap4_state *unus
 }
 
 /*
- * struct imap4_command_rv imap4_CAPA(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_CAPA(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
  *
  * Syntax: CAPA
  *
  * Lists the capabilities of the server. Can theoretically output different values in different states.
  */
-struct imap4_command_rv imap4_CAPA(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_CAPA(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
 	_send_OK(ofp, S_CAPA_RESPONSE);
 	if(*current_state==p3Transaction) {
 	}
@@ -166,7 +166,7 @@ struct imap4_command_rv imap4_CAPA(int argc, char *argv[], enum imap4_state *cur
 }
 
 /*
- * struct imap4_command_rv imap4_USERPASS(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_USERPASS(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
  *
  * Syntax: USER <user name>
  *				 PASS <password>
@@ -176,7 +176,7 @@ struct imap4_command_rv imap4_CAPA(int argc, char *argv[], enum imap4_state *cur
  *
  * Uses a static var to remember the username between calls.
  */
-struct imap4_command_rv imap4_USERPASS(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_USERPASS(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
 	static char username[ABSOLUTE_MAX_USERNAME_LENGTH];
 	if(!strcasecmp(argv[0],"PASS")) {
 		if(!username[0]) {
@@ -208,7 +208,7 @@ struct imap4_command_rv imap4_USERPASS(int argc, char *argv[], enum imap4_state 
 }
 
 /*
- * struct imap4_command_rv imap4_APOP(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_APOP(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
  *
  * Syntax: APOP <user name> <digest>
  *
@@ -217,7 +217,7 @@ struct imap4_command_rv imap4_USERPASS(int argc, char *argv[], enum imap4_state 
  *
  * Only works if OpenSSL is enabled.
  */
-struct imap4_command_rv imap4_APOP(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_APOP(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
 #ifdef USE_OPENSSL
 	char const *timestamp=_auth_timestamp();
 	if(!timestamp) return imap4_rv_not_implemented;
@@ -271,7 +271,7 @@ struct imap4_command_rv imap4_APOP(int argc, char *argv[], enum imap4_state *cur
 }
 
 /*
- * struct imap4_command_rv imap4_NOOP(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_NOOP(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
  *
  * Syntax: NOOP
  *
@@ -279,18 +279,18 @@ struct imap4_command_rv imap4_APOP(int argc, char *argv[], enum imap4_state *cur
  */
 struct imap4_command_rv imap4_rv_noop={IMAP4_OK, 0, S_NOOP, NULL};
 
-struct imap4_command_rv imap4_NOOP(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_NOOP(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	return imap4_rv_noop;
 }
 /*
- * struct imap4_command_rv imap4_STAT(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_STAT(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
  *
  * Syntax: STAT
  *
  * Outputs the mailbox's STATistics: number of messages and total size (in bytes, of the expected output).
  * Theoretically can be used to determine if a mailbox has changed. In practice, UIDL works better for this.
  */
-struct imap4_command_rv imap4_STAT(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_STAT(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	unsigned long int message_count=0;
 	unsigned long int message_sum=0;
 	struct imap4_message *current_message;
@@ -317,13 +317,13 @@ struct imap4_command_rv imap4_STAT(int argc, char *argv[], enum imap4_state *unu
 }
 
 /*
- * struct imap4_command_rv imap4_LIST(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_LIST(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
  *
  * Syntax: LIST [<message number>]
  *
  * Outputs the message number and size of either the specified message or all messages (in order).
  */
-struct imap4_command_rv imap4_LIST(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_LIST(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	struct imap4_message *current_message=_storage_first_message();
 	long unsigned int i;
 	
@@ -355,7 +355,7 @@ struct imap4_command_rv imap4_LIST(int argc, char *argv[], enum imap4_state *unu
 }
 
 /*
- * struct imap4_command_rv imap4_RSET(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_RSET(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
  *
  * Syntax: RSET
  *
@@ -363,7 +363,7 @@ struct imap4_command_rv imap4_LIST(int argc, char *argv[], enum imap4_state *unu
  */
 struct imap4_command_rv imap4_rv_reset={IMAP4_OK, 0, S_RESET, NULL};
 
-struct imap4_command_rv imap4_RSET(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_RSET(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	struct imap4_message *current_message=_storage_first_message();
 	unsigned long int i;
 	
@@ -381,14 +381,14 @@ struct imap4_command_rv imap4_RSET(int argc, char *argv[], enum imap4_state *unu
 	return imap4_rv_reset;
 }
 /*
- * struct imap4_command_rv imap4_UIDL(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_UIDL(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
  *
  * Syntax: UIDL [<message number>]
  *
  * Like LIST, only with a magic string instead of the message size. This magic string is supposed to be unique (to the message)
  * for all time, within the scope of this particular mailbox. It's thus used as a have-I-already-seen-this-message marker.
  */
-struct imap4_command_rv imap4_UIDL(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_UIDL(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	struct imap4_message *current_message=_storage_first_message();
 	long unsigned int i;
 
@@ -426,7 +426,7 @@ struct imap4_command_rv imap4_UIDL(int argc, char *argv[], enum imap4_state *unu
 }
 
 /*
- * struct imap4_command_rv imap4_LOGOUT(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_LOGOUT(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
  *
  * Syntax: LOGOUT
  *
@@ -434,7 +434,7 @@ struct imap4_command_rv imap4_UIDL(int argc, char *argv[], enum imap4_state *unu
  */
 struct imap4_command_rv imap4_rv_logout={IMAP4_BYE, 0, S_LOGOUT, NULL};
 
-struct imap4_command_rv imap4_LOGOUT(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_LOGOUT(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
 	*current_state=p3Update;
 	return imap4_rv_logout;
 }

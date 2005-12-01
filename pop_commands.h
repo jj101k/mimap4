@@ -15,7 +15,7 @@ extern struct imap4_command_rv imap4_rv_misc_success, imap4_rv_misc_failure, ima
 
 struct popcommand {
 	char *name;
-	struct imap4_command_rv (*function)(int, char *[], enum imap4_state *, FILE *, FILE *);
+	struct imap4_command_rv (*function)(const char const *, int, char *[], enum imap4_state *, FILE *, FILE *);
 	unsigned int min_argc;
 	unsigned int max_argc;
 	unsigned int valid_states;
@@ -27,7 +27,7 @@ struct popcommand {
 // opt/trans: top uidl 
 // opt/auth: user* pass* apop*
 
-#define DEFINE_IMAP4(cmd) struct imap4_command_rv cmd(int, char *[], enum imap4_state *, FILE *, FILE *)
+#define DEFINE_IMAP4(cmd) struct imap4_command_rv cmd(const char const *, int, char *[], enum imap4_state *, FILE *, FILE *)
 
 DEFINE_IMAP4(imap4_CAPA);
 

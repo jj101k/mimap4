@@ -115,11 +115,16 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 			return current_state;
 		}
 	}
+	if(argc<=1) {
+		_send_ERR(ofp, E_PROTOCOL_ERROR, NULL);
+		return current_state;
+	}
+	argc--;
 	imap4_command_rv=imap4_rv_invalid;
 	char bad_command_args=0;
 	for(i=0;imap4_commands[i].name;i++) {
 		if(! ( imap4_commands[i].valid_states & BIT(current_state) ) ) continue;
-		if(!strcasecmp(imap4_commands[i].name, argv[0])) {
+		if(!strcasecmp(imap4_commands[i].name, argv[1])) {
 			int do_command=0;
 
 			if(argc-1 < imap4_commands[i].min_argc || argc-1 > imap4_commands[i].max_argc) {
@@ -147,7 +152,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 				do_command=1;
 			}
 			if(do_command) {
-				imap4_command_rv=(*(imap4_commands[i].function))(argc, argv, &current_state, ifp, ofp);
+				imap4_command_rv=(*(imap4_commands[i].function))(argv[0], argc, argv+1, &current_state, ifp, ofp);
 			} else if(bad_command_args) {
 				imap4_command_rv=imap4_rv_badargs;
 			} else {
@@ -161,7 +166,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 
 	if(!imap4_command_rv.response_already_sent) {
 		if(imap4_command_rv.response_type) {
-			_send_misc(ofp, NULL, imap4_command_rv.response_type, imap4_command_rv.extra_string);
+			_send_misc(ofp, argv[0], imap4_command_rv.response_type, imap4_command_rv.extra_string);
 		} else {
 			_send_ERR(ofp, imap4_command_rv.extra_string, imap4_command_rv.extended_error_code);
 		}
