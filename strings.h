@@ -17,7 +17,6 @@
 #define S_MESSAGE_FOLLOWS "message follows"
 #define S_MESSAGE_DELETED "message deleted"
 #define S_LOGIN_SUCCESS "logged in"
-#define S_USER_SUCCESS "please supply a password now"
 #define S_NOOP "nothing happens"
 #define S_RESET "all messages undeleted"
 #define S_LOGOUT "bye bye"

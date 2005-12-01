@@ -1,7 +1,7 @@
 /*
  * char const *(*_auth_attempt_login)(char const *username, char const *password)
  *
- * If login succeeds, returns the mailbox name. This would be used by USER/PASS, and is suitable for systems without verbatim
+ * If login succeeds, returns the mailbox name. This would be used by LOGIN, and is suitable for systems without verbatim
  * stored passwords (eg most system logins).
  */
 extern char const *(*_auth_attempt_login)(char const *, char const *);

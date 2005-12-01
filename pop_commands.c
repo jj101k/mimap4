@@ -19,23 +19,20 @@ struct imap4_command_rv
 	imap4_rv_quiet_success={IMAP4_OK, 1, NULL, NULL}, 						imap4_rv_quiet_failure={IMAP4_BAD, 1, NULL, NULL},
 	imap4_rv_invalid={IMAP4_BAD, 0, E_INVALID_COMMAND, NULL}, 			imap4_rv_badargs={IMAP4_BAD, 0, E_BAD_ARGUMENTS},
 
-	imap4_rv_login_success={IMAP4_OK, 0, S_LOGIN_SUCCESS, NULL}, 	imap4_rv_user_success={IMAP4_OK, 0, S_USER_SUCCESS, NULL},
+	imap4_rv_login_success={IMAP4_OK, 0, S_LOGIN_SUCCESS, NULL},
 
 	imap4_rv_bad_message={"FIXME", 0, E_BADMESSAGE, NULL}, 			imap4_rv_edelay={"FIXME", 0, E_DELAY, P3EXT_LOGIN_DELAY},
-	imap4_rv_elocked={"FIXME", 0, E_LOCKED, P3EXT_IN_USE}, 			imap4_rv_ebadlogin={"FIXME", 0, E_BADLOGIN, NULL},
+	imap4_rv_ebadlogin={"NO", 0, E_BADLOGIN, NULL},
 	imap4_rv_internal_error={"FIXME", 0, E_INTERNAL_ERROR}, 			imap4_rv_not_implemented={"FIXME", 0, E_NOT_IMPLEMENTED};
 
 /* Command definitions */
-/* - These two are needed to suppress warnings! - */
-char *user_and_pass[]={"USER", "PASS", NULL};
-char *user_only[]={"USER", NULL};
+char *login_only[] = {"LOGIN"};
 
 /* Name		Symbol			Args(min,max)		States														Valid after failure			Valid after success */
 struct popcommand imap4_commands[]={
 	{"CAPA",imap4_CAPA, 			0,0, BIT(p3Transaction)|BIT(p3Authorisation), NULL, 									NULL					},
-	{"USER",imap4_USERPASS, 	1,1, BIT(p3Authorisation), 										user_and_pass,					NULL					},
-	{"PASS",imap4_USERPASS, 	1,1, BIT(p3Authorisation), 										NULL, 									user_only			},
-	{"APOP",imap4_APOP, 			2,2, BIT(p3Authorisation), 										user_and_pass,					NULL					},
+	{"LOGIN",imap4_LOGIN, 		2,2, BIT(p3Authorisation), 									login_only, 								NULL					},
+	{"APOP",imap4_APOP, 			2,2, BIT(p3Authorisation), 										login_only,					NULL					},
 
 	{"NOOP",imap4_NOOP, 			0,0, BIT(p3Transaction), 											NULL, 									NULL					},
 	{"STAT",imap4_STAT, 			0,0, BIT(p3Transaction), 											NULL, 									NULL					},
@@ -166,44 +163,34 @@ struct imap4_command_rv imap4_CAPA(const char const *tag, int argc, char *argv[]
 }
 
 /*
- * struct imap4_command_rv imap4_USERPASS(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
  *
- * Syntax: USER <user name>
- *				 PASS <password>
+ * Syntax: LOGIN <user name> <password>
  *
- * Logs the user in. The interaction between USER and PASS is actually quite complicated, but a successful USER
- * must always precede PASS.
+ * Logs the user in. 
  *
- * Uses a static var to remember the username between calls.
  */
-struct imap4_command_rv imap4_USERPASS(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
-	static char username[ABSOLUTE_MAX_USERNAME_LENGTH];
-	if(!strcasecmp(argv[0],"PASS")) {
-		if(!username[0]) {
-			return imap4_rv_ebadlogin;
-		}
-		char const *mailbox=_auth_attempt_login(username, argv[1]);
-		if(mailbox) {
-			if(_auth_login_delay_needed(username)) {
-				return imap4_rv_edelay; // delayed
-			} else if(_storage_lock_mailbox(mailbox)) {
-				if(_storage_need_user()==wuMailbox) {
-					if(!drop_privs_to_user(mailbox)) drop_privs();
-				} else {
-					drop_privs();
-				}
-				*current_state=p3Transaction;
-				return imap4_rv_login_success;
-			} else {
-				return imap4_rv_elocked; // locked
-			}
+struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+	size_t username_length = strlen(argv[1]);
+	if(username_length>=ABSOLUTE_MAX_USERNAME_LENGTH || username_length<=0) return imap4_rv_ebadlogin;
+
+	char const *mailbox=_auth_attempt_login(argv[1], argv[2]);
+	if(mailbox) {
+		if(_auth_login_delay_needed(argv[1])) {
+			return imap4_rv_edelay; // delayed
 		} else {
-			return imap4_rv_ebadlogin; // invalid
+			/* FIXME */
+			_storage_lock_mailbox(mailbox);
+			if(_storage_need_user()==wuMailbox) {
+				if(!drop_privs_to_user(mailbox)) drop_privs();
+			} else {
+				drop_privs();
+			}
+			*current_state=p3Transaction;
+			return imap4_rv_login_success;
 		}
 	} else {
-		if(strlen(argv[1])>=ABSOLUTE_MAX_USERNAME_LENGTH) return imap4_rv_ebadlogin;
-		strncpy(username, argv[1], strlen(argv[1])+1);
-		return imap4_rv_user_success;
+		return imap4_rv_ebadlogin; // invalid
 	}
 }
 
@@ -251,7 +238,8 @@ struct imap4_command_rv imap4_APOP(const char const *tag, int argc, char *argv[]
 			return imap4_rv_internal_error;
 		} else if(_auth_login_delay_needed(username)) {
 			return imap4_rv_edelay; // delayed
-		} else if(_storage_lock_mailbox(mailbox)) {
+		} else {
+			_storage_lock_mailbox(mailbox); /* FIXME */
 			if(_storage_need_user()==wuMailbox) {
 				if(!drop_privs_to_user(mailbox)) drop_privs();
 			} else {
@@ -259,8 +247,6 @@ struct imap4_command_rv imap4_APOP(const char const *tag, int argc, char *argv[]
 			}
 			*current_state=p3Transaction;
 			return imap4_rv_login_success;
-		} else {
-			return imap4_rv_elocked; // locked
 		}
 	} else {
 		return imap4_rv_ebadlogin;
