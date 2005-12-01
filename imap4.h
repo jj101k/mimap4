@@ -8,13 +8,17 @@ enum imap4_state {p3Dead, p3Authorisation, p3Transaction, p3Update, p3EndMarker}
 
 enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_state);
 int handle_connection(FILE *ifp, FILE *ofp);
-int _send_misc(FILE *ofp, char *prefix, char *message, char *extended_code);
+int _send_misc(FILE *ofp, char *tag, char *prefix, char *message);
 
-#define IMAP4_SUCCESS "OK"
-#define IMAP4_FAILURE "BAD"
+#define IMAP4_OK "OK"
+#define IMAP4_BAD "BAD"
+#define IMAP4_NO "NO"
+#define IMAP4_BYE "BYE"
 
-#define _send_ERR(ofp, message, extended_error) _send_misc(ofp, IMAP4_FAILURE, message, extended_error)
-#define _send_OK(ofp, message) _send_misc(ofp, IMAP4_SUCCESS, message, NULL)
+#define IMAP4_DEFAULT_TAG "*"
+
+#define _send_ERR(ofp, message, extended_error) _send_misc(ofp, NULL, IMAP4_BAD, message)
+#define _send_OK(ofp, message) _send_misc(ofp, NULL, IMAP4_OK, message)
 
 #define DEFAULT_PORT htons(110)
 

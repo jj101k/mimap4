@@ -57,15 +57,12 @@ int _imap4_fprintf(FILE *out, char const *format, ...) {
 	return rv;
 }
 
-int _send_misc(FILE *ofp, char *prefix, char *message, char *extended_error) {
+int _send_misc(FILE *ofp, char *tag, char *prefix, char *message) {
+	if(!tag) tag=IMAP4_DEFAULT_TAG;
 	if(message) {
-		if(extended_error) {
-			return _imap4_fprintf(ofp, "%s [%s] %s\r\n", prefix, extended_error, message);
-		} else {
-			return _imap4_fprintf(ofp, "%s %s\r\n", prefix, message);
-		}
+		return _imap4_fprintf(ofp, "%s %s %s\r\n", tag, prefix, message);
 	} else {
-		return _imap4_fprintf(ofp, "%s\r\n", prefix);
+		return _imap4_fprintf(ofp, "%s %s\r\n", tag, prefix);
 	}
 }
 
@@ -94,7 +91,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 	char *cursor;
 	int i;
 	struct imap4_command_rv imap4_command_rv;
-	static struct imap4_command_rv previous_imap4_command_rv={1,0,NULL};
+	static struct imap4_command_rv previous_imap4_command_rv={IMAP4_OK,0,NULL};
 
 	{
 		sigalarm_out=ofp;
@@ -131,7 +128,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 				if(!previous_command_line[0]) {
 					// empty line??
 					do_command=1;
-				} else if(previous_imap4_command_rv.successful) {
+				} else if(1/* previous_imap4_command_rv.successful */) {
 					do_command=0;
 				} else if(grep_equal(previous_command_line, imap4_commands[i].valid_after_failed)) {
 					do_command=1;
@@ -139,7 +136,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 					do_command=0;
 				}
 			} else if(imap4_commands[i].valid_after_successful) {
-				if(!previous_imap4_command_rv.successful) {
+				if(!1/* previous_imap4_command_rv.successful */) {
 					do_command=0;
 				} else if(grep_equal(previous_command_line, imap4_commands[i].valid_after_successful)) {
 					do_command=1;
@@ -163,8 +160,8 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 	previous_imap4_command_rv=imap4_command_rv;
 
 	if(!imap4_command_rv.response_already_sent) {
-		if(imap4_command_rv.successful) {
-			_send_OK(ofp, imap4_command_rv.extra_string);
+		if(imap4_command_rv.response_type) {
+			_send_misc(ofp, NULL, imap4_command_rv.response_type, imap4_command_rv.extra_string);
 		} else {
 			_send_ERR(ofp, imap4_command_rv.extra_string, imap4_command_rv.extended_error_code);
 		}
@@ -174,7 +171,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 
 int handle_connection(FILE *ifp, FILE *ofp) {
 	enum imap4_state current_state=p3Authorisation;
-	_imap4_fprintf(ofp, "* " IMAP4_SUCCESS " %s\r\n", S_SERVER_ID);
+	_imap4_fprintf(ofp, IMAP4_DEFAULT_TAG " " IMAP4_OK " %s\r\n", S_SERVER_ID);
 	while(1) {
 		current_state=command_loop(ifp, ofp, current_state);
 		if(current_state == p3Dead) {

@@ -20,7 +20,7 @@
 #define S_USER_SUCCESS "please supply a password now"
 #define S_NOOP "nothing happens"
 #define S_RESET "all messages undeleted"
-#define S_QUIT "bye bye"
+#define S_LOGOUT "bye bye"
 #define S_CAPA_RESPONSE "capability list follows"
 
 #define S_SERVER_IMPLEMENTATION PACKAGE_NAME " version " PACKAGE_VERSION

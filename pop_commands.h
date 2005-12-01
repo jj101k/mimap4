@@ -5,7 +5,7 @@
 #include "storage_functions.h"
 
 struct imap4_command_rv {
-	int successful;
+	char *response_type;
 	char response_already_sent;
 	char *extra_string;
 	char *extended_error_code;
@@ -41,6 +41,6 @@ DEFINE_IMAP4(imap4_RETR);
 DEFINE_IMAP4(imap4_TOP);
 DEFINE_IMAP4(imap4_DELE);
 DEFINE_IMAP4(imap4_RSET);
-DEFINE_IMAP4(imap4_QUIT);
+DEFINE_IMAP4(imap4_LOGOUT);
 
 extern struct popcommand imap4_commands[];

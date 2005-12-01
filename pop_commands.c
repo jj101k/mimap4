@@ -15,15 +15,15 @@
 /* Compound return codes */
 /* Values are: is_success, dont_send_OK, message, prefix code */
 struct imap4_command_rv
-	imap4_rv_misc_success={1, 0, NULL, NULL}, 							imap4_rv_misc_failure={0, 0, NULL, NULL},
-	imap4_rv_quiet_success={1, 1, NULL, NULL}, 						imap4_rv_quiet_failure={0, 1, NULL, NULL},
-	imap4_rv_invalid={0, 0, E_INVALID_COMMAND, NULL}, 			imap4_rv_badargs={0, 0, E_BAD_ARGUMENTS},
+	imap4_rv_misc_success={IMAP4_OK, 0, NULL, NULL}, 							imap4_rv_misc_failure={IMAP4_BAD, 0, NULL, NULL},
+	imap4_rv_quiet_success={IMAP4_OK, 1, NULL, NULL}, 						imap4_rv_quiet_failure={IMAP4_BAD, 1, NULL, NULL},
+	imap4_rv_invalid={IMAP4_NO, 0, E_INVALID_COMMAND, NULL}, 			imap4_rv_badargs={IMAP4_BAD, 0, E_BAD_ARGUMENTS},
 
-	imap4_rv_login_success={1, 0, S_LOGIN_SUCCESS, NULL}, 	imap4_rv_user_success={1, 0, S_USER_SUCCESS, NULL},
+	imap4_rv_login_success={IMAP4_OK, 0, S_LOGIN_SUCCESS, NULL}, 	imap4_rv_user_success={IMAP4_OK, 0, S_USER_SUCCESS, NULL},
 
-	imap4_rv_bad_message={0, 0, E_BADMESSAGE, NULL}, 			imap4_rv_edelay={0, 0, E_DELAY, P3EXT_LOGIN_DELAY},
-	imap4_rv_elocked={0, 0, E_LOCKED, P3EXT_IN_USE}, 			imap4_rv_ebadlogin={0, 0, E_BADLOGIN, NULL},
-	imap4_rv_internal_error={0, 0, E_INTERNAL_ERROR}, 			imap4_rv_not_implemented={0, 0, E_NOT_IMPLEMENTED};
+	imap4_rv_bad_message={"FIXME", 0, E_BADMESSAGE, NULL}, 			imap4_rv_edelay={"FIXME", 0, E_DELAY, P3EXT_LOGIN_DELAY},
+	imap4_rv_elocked={"FIXME", 0, E_LOCKED, P3EXT_IN_USE}, 			imap4_rv_ebadlogin={"FIXME", 0, E_BADLOGIN, NULL},
+	imap4_rv_internal_error={"FIXME", 0, E_INTERNAL_ERROR}, 			imap4_rv_not_implemented={"FIXME", 0, E_NOT_IMPLEMENTED};
 
 /* Command definitions */
 /* - These two are needed to suppress warnings! - */
@@ -46,7 +46,7 @@ struct popcommand imap4_commands[]={
 	{"DELE",imap4_DELE, 			1,1, BIT(p3Transaction), 											NULL, 									NULL					},
 	{"RSET",imap4_RSET, 			0,0, BIT(p3Transaction), 											NULL, 									NULL					},
 
-	{"QUIT",imap4_QUIT, 			0,0, BIT(p3Transaction)|BIT(p3Authorisation), NULL, 									NULL					},
+	{"LOGOUT",imap4_LOGOUT, 			0,0, BIT(p3Transaction)|BIT(p3Authorisation), NULL, 									NULL					},
 	{NULL,	NULL,						0,0}
 };
 
@@ -72,7 +72,7 @@ struct imap4_message * valid_message(unsigned long int index) {
  *
  * Marks a message deleted
  */
-struct imap4_command_rv imap4_rv_message_deleted={1, 0, S_MESSAGE_DELETED, NULL};
+struct imap4_command_rv imap4_rv_message_deleted={IMAP4_OK, 0, S_MESSAGE_DELETED, NULL};
 
 struct imap4_command_rv imap4_DELE(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	struct imap4_message *current_message;
@@ -277,7 +277,7 @@ struct imap4_command_rv imap4_APOP(int argc, char *argv[], enum imap4_state *cur
  *
  * Does nothing. Elicits a successful response unless the world has ended.
  */
-struct imap4_command_rv imap4_rv_noop={1, 0, S_NOOP, NULL};
+struct imap4_command_rv imap4_rv_noop={IMAP4_OK, 0, S_NOOP, NULL};
 
 struct imap4_command_rv imap4_NOOP(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	return imap4_rv_noop;
@@ -312,7 +312,7 @@ struct imap4_command_rv imap4_STAT(int argc, char *argv[], enum imap4_state *unu
 		}
 	}
 
-	_imap4_fprintf(ofp, IMAP4_SUCCESS " %lu %lu\r\n", message_count, message_sum);
+	_imap4_fprintf(ofp, IMAP4_OK " %lu %lu\r\n", message_count, message_sum);
 	return imap4_rv_quiet_success;;
 }
 
@@ -348,7 +348,7 @@ struct imap4_command_rv imap4_LIST(int argc, char *argv[], enum imap4_state *unu
 		if(!current_message) {
 			return imap4_rv_bad_message;
 		} else {
-			_imap4_fprintf(ofp, IMAP4_SUCCESS " %lu %lu\r\n", i, current_message->size);
+			_imap4_fprintf(ofp, IMAP4_OK " %lu %lu\r\n", i, current_message->size);
 			return imap4_rv_quiet_success;
 		}
 	}
@@ -361,7 +361,7 @@ struct imap4_command_rv imap4_LIST(int argc, char *argv[], enum imap4_state *unu
  *
  * Resets all state flags (ie: un-marks all deleted messages) for the mailbox.
  */
-struct imap4_command_rv imap4_rv_reset={1, 0, S_RESET, NULL};
+struct imap4_command_rv imap4_rv_reset={IMAP4_OK, 0, S_RESET, NULL};
 
 struct imap4_command_rv imap4_RSET(int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	struct imap4_message *current_message=_storage_first_message();
@@ -417,7 +417,7 @@ struct imap4_command_rv imap4_UIDL(int argc, char *argv[], enum imap4_state *unu
 		if(!current_message) {
 			return imap4_rv_bad_message;
 		} else {
-			_imap4_fprintf(ofp, IMAP4_SUCCESS " %lu %s\r\n", i, current_message->uidl);
+			_imap4_fprintf(ofp, IMAP4_OK " %lu %s\r\n", i, current_message->uidl);
 			return imap4_rv_quiet_success;
 		}
 	}
@@ -426,16 +426,16 @@ struct imap4_command_rv imap4_UIDL(int argc, char *argv[], enum imap4_state *unu
 }
 
 /*
- * struct imap4_command_rv imap4_QUIT(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
+ * struct imap4_command_rv imap4_LOGOUT(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
  *
- * Syntax: QUIT
+ * Syntax: LOGOUT
  *
  * Logs you out, deleting all messages you've marked for deletion.
  */
-struct imap4_command_rv imap4_rv_quit={1, 0, S_QUIT, NULL};
+struct imap4_command_rv imap4_rv_logout={IMAP4_BYE, 0, S_LOGOUT, NULL};
 
-struct imap4_command_rv imap4_QUIT(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+struct imap4_command_rv imap4_LOGOUT(int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
 	*current_state=p3Update;
-	return imap4_rv_quit;
+	return imap4_rv_logout;
 }
 
