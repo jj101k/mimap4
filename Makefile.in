@@ -1,6 +1,6 @@
 include defaults.mk
 TARGET=mimap4
-OBJECTS=main.o storage_default.o pop_commands.o imap4.o util.o modules.o auth_default.o parse_conffile.o net.o
+OBJECTS=main.o storage_default.o imap_commands.o imap4.o util.o modules.o auth_default.o parse_conffile.o net.o
 ALSO_CLEAN=.gdb_history parse_conffile.c rendezvous_test_prog $(TARGET).conf test-$(TARGET).conf
 SUBDIRS=auth_file storage_mbox auth_getpw @extra_modules@
 AWK=@AWK@

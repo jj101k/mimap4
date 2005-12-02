@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "auth_functions.h"
-#include "pop_commands.h"
+#include "imap_commands.h"
 #include "strings.h"
 #include "imap4.h"
 
