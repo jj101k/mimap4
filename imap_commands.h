@@ -29,18 +29,8 @@ struct popcommand {
 
 #define DEFINE_IMAP4(cmd) struct imap4_command_rv cmd(const char const *, int, char *[], enum imap4_state *, FILE *, FILE *)
 
-DEFINE_IMAP4(imap4_CAPA);
-
 DEFINE_IMAP4(imap4_LOGIN);
-DEFINE_IMAP4(imap4_APOP);
 DEFINE_IMAP4(imap4_NOOP);
-DEFINE_IMAP4(imap4_STAT);
-DEFINE_IMAP4(imap4_LIST);
-DEFINE_IMAP4(imap4_UIDL);
-DEFINE_IMAP4(imap4_RETR);
-DEFINE_IMAP4(imap4_TOP);
-DEFINE_IMAP4(imap4_DELE);
-DEFINE_IMAP4(imap4_RSET);
 DEFINE_IMAP4(imap4_LOGOUT);
 
 extern struct popcommand imap4_commands[];
