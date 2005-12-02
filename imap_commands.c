@@ -32,7 +32,7 @@ char *login_only[] = {"LOGIN"};
 struct popcommand imap4_commands[]={
 	{"LOGIN",imap4_LOGIN, 		2,2, BIT(p3Authorisation), 									login_only, 								NULL					},
 
-	{"NOOP",imap4_NOOP, 			0,0, BIT(p3Transaction), 											NULL, 									NULL					},
+	{"NOOP",imap4_NOOP, 			0,0, BIT(p3Transaction)|BIT(p3Authorisation), 											NULL, 									NULL					},
 
 	{"LOGOUT",imap4_LOGOUT, 			0,0, BIT(p3Transaction)|BIT(p3Authorisation), NULL, 									NULL					},
 	{NULL,	NULL,						0,0}
