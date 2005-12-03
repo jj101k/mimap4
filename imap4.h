@@ -1,10 +1,10 @@
 #ifndef __IMAP4_H
 #define __IMAP4_H
 #include <stdio.h>
-enum imap4_state {p3Dead, p3Authorisation, p3Transaction, p3Update, p3EndMarker};
+enum imap4_state {st_Dead, st_PreAuth, st_PostAuth, st_Selected, st_Logout, st_EndMarker};
 
 #define BIT(a) (1<<(a))
-#define ALL_IMAP4_STATES BIT(p3EndMarker)-1
+#define ALL_IMAP4_STATES BIT(st_EndMarker)-1
 
 enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_state);
 int handle_connection(FILE *ifp, FILE *ofp);

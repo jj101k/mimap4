@@ -1,7 +1,6 @@
 To do:
 
 * Fix when commands can happen (FOO, LOGIN)
-* Fix state list
 * Fix all the FIXMEs
 * Add docs
 * Make some of the module options configurable

@@ -98,7 +98,7 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 		sig_t old_sigalarm_handler=signal(SIGALRM, handle_sigalarm);
 		alarm(DEFAULT_TIMEOUT);
 
-		if(!fgets(command_line, RFC_MAX_INPUT_LENGTH, ifp)) return p3Dead;
+		if(!fgets(command_line, RFC_MAX_INPUT_LENGTH, ifp)) return st_Dead;
 
 		alarm(0);
 		signal(SIGALRM, old_sigalarm_handler);
@@ -175,14 +175,14 @@ enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_sta
 }
 
 int handle_connection(FILE *ifp, FILE *ofp) {
-	enum imap4_state current_state=p3Authorisation;
+	enum imap4_state current_state=st_PreAuth;
 	_imap4_fprintf(ofp, IMAP4_DEFAULT_TAG " " IMAP4_OK " %s\r\n", S_SERVER_ID);
 	while(1) {
 		current_state=command_loop(ifp, ofp, current_state);
-		if(current_state == p3Dead) {
+		if(current_state == st_Dead) {
 			break;
 		}
-		if(current_state == p3Update) {
+		if(current_state == st_Logout) {
 			_storage_synch();
 			break;
 		}

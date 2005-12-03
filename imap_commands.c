@@ -30,11 +30,11 @@ char *login_only[] = {"LOGIN"};
 
 /* Name		Symbol			Args(min,max)		States														Valid after failure			Valid after success */
 struct popcommand imap4_commands[]={
-	{"LOGIN",imap4_LOGIN, 		2,2, BIT(p3Authorisation), 									login_only, 								NULL					},
+	{"LOGIN",imap4_LOGIN, 		2,2, BIT(st_PreAuth), 									login_only, 								NULL					},
 
-	{"NOOP",imap4_NOOP, 			0,0, BIT(p3Transaction)|BIT(p3Authorisation), 											NULL, 									NULL					},
+	{"NOOP",imap4_NOOP, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 
-	{"LOGOUT",imap4_LOGOUT, 			0,0, BIT(p3Transaction)|BIT(p3Authorisation), NULL, 									NULL					},
+	{"LOGOUT",imap4_LOGOUT, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), NULL, 									NULL					},
 	{NULL,	NULL,						0,0}
 };
 
@@ -77,7 +77,7 @@ struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[
 			} else {
 				drop_privs();
 			}
-			*current_state=p3Transaction;
+			*current_state=st_PostAuth;
 			return imap4_rv_login_success;
 		}
 	} else {
@@ -108,7 +108,7 @@ struct imap4_command_rv imap4_NOOP(const char const *tag, int argc, char *argv[]
 struct imap4_command_rv imap4_rv_logout={IMAP4_BYE, 0, S_LOGOUT, NULL};
 
 struct imap4_command_rv imap4_LOGOUT(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
-	*current_state=p3Update;
+	*current_state=st_Logout;
 	return imap4_rv_logout;
 }
 
