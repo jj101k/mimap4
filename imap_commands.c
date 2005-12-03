@@ -70,8 +70,6 @@ struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[
 		if(_auth_login_delay_needed(argv[1])) {
 			return imap4_rv_edelay; // delayed
 		} else {
-			/* FIXME */
-			_storage_lock_mailbox(mailbox);
 			if(_storage_need_user()==wuMailbox) {
 				if(!drop_privs_to_user(mailbox)) drop_privs();
 			} else {
