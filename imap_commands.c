@@ -1,4 +1,5 @@
 #include <string.h>
+#include <ctype.h>
 #include "imap_commands.h"
 #include "strings.h"
 #include "imap4.h"
@@ -32,6 +33,7 @@ struct popcommand imap4_commands[]={
 
 	{"NOOP",imap4_NOOP, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 	{"SELECT",imap4_SELECT, 			1,1, BIT(st_PostAuth)|BIT(st_Selected), 											NULL, 									NULL					},
+	{"EXAMINE",imap4_SELECT, 			1,1, BIT(st_PostAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 	{"CAPABILITY",imap4_CAPABILITY, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 
 	{"LOGOUT",imap4_LOGOUT, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), NULL, 									NULL					},
@@ -95,12 +97,17 @@ struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[
  *
  */
 struct imap4_command_rv imap4_SELECT(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
-	if(_storage_select_folder(argv[1], 0)) {
+	char command_name[50];
+	unsigned long int i;
+	for(i=0;argv[0][i];i++) {
+		command_name[i]=(char)toupper(argv[0][i]);
+	}
+	command_name[i]=0;
+	if(_storage_select_folder(argv[1], (!strcmp(command_name, "SELECT"))?0:1)) {
 	
         unsigned long int message_count=0;
         unsigned long int message_recent_count=0;
         struct imap4_message *current_message;
-        unsigned long int i;
 
         if(_storage_array_style()==asArray) {
                 message_count=_storage_message_count();
@@ -133,11 +140,13 @@ struct imap4_command_rv imap4_SELECT(const char const *tag, int argc, char *argv
 		}
 		_send_printf(ofp, NULL, "FLAGS (%s)", flag_list);
 		_send_printf(ofp, NULL, IMAP4_OK " [UIDVALIDITY %lu]", _storage_uidvalidity());
-		return adhoc_command_rv(IMAP4_OK, 0, "SELECT completed", _storage_is_readonly()?"READ-ONLY":"READ-WRITE");
+		return adhoc_command_rv(IMAP4_OK, 0, "SELECT/EXAMINE completed", _storage_is_readonly()?"READ-ONLY":"READ-WRITE");
 	} else {
-		return adhoc_command_rv(IMAP4_NO, 0, "SELECT can't open folder", NULL);
+		return adhoc_command_rv(IMAP4_NO, 0, "SELECT/EXAMINE can't open folder", NULL);
 	}
 }
+
+
 
 /*
  * struct imap4_command_rv imap4_AUTHENTICATE(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
