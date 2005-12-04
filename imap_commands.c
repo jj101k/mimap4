@@ -25,12 +25,9 @@ struct imap4_command_rv
 	imap4_rv_ebadlogin={"NO", 0, E_BADLOGIN, NULL},
 	imap4_rv_internal_error={"FIXME", 0, E_INTERNAL_ERROR}, 			imap4_rv_not_implemented={"FIXME", 0, E_NOT_IMPLEMENTED};
 
-/* Command definitions */
-char *login_only[] = {"LOGIN"};
-
 /* Name		Symbol			Args(min,max)		States														Valid after failure			Valid after success */
 struct popcommand imap4_commands[]={
-	{"LOGIN",imap4_LOGIN, 		2,2, BIT(st_PreAuth), 									login_only, 								NULL					},
+	{"LOGIN",imap4_LOGIN, 		2,2, BIT(st_PreAuth), 									NULL, 								NULL					},
 
 	{"NOOP",imap4_NOOP, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 	{"CAPABILITY",imap4_CAPABILITY, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
