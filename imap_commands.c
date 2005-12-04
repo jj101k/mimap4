@@ -33,6 +33,7 @@ struct popcommand imap4_commands[]={
 	{"LOGIN",imap4_LOGIN, 		2,2, BIT(st_PreAuth), 									login_only, 								NULL					},
 
 	{"NOOP",imap4_NOOP, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
+	{"CAPABILITY",imap4_CAPABILITY, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 
 	{"LOGOUT",imap4_LOGOUT, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), NULL, 									NULL					},
 	{NULL,	NULL,						0,0}
@@ -95,6 +96,22 @@ struct imap4_command_rv imap4_rv_noop={IMAP4_OK, 0, S_NOOP, NULL};
 struct imap4_command_rv imap4_NOOP(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	return imap4_rv_noop;
 }
+
+/*
+ * struct imap4_command_rv imap4_CAPABILITY(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
+ *
+ * Syntax: CAPABILITY
+ *
+ * Tells the user what this server can do.
+ */
+struct imap4_command_rv imap4_rv_capability={IMAP4_OK, 0, "CAPABILITY completed", NULL};
+char *capabilities="IMAP4rev1";
+
+struct imap4_command_rv imap4_CAPABILITY(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
+	_send_misc(ofp, NULL, "CAPABILITY", capabilities);
+	return imap4_rv_capability;
+}
+
 
 /*
  * struct imap4_command_rv imap4_LOGOUT(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)

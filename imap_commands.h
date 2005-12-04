@@ -31,6 +31,7 @@ struct popcommand {
 
 DEFINE_IMAP4(imap4_LOGIN);
 DEFINE_IMAP4(imap4_NOOP);
+DEFINE_IMAP4(imap4_CAPABILITY);
 DEFINE_IMAP4(imap4_LOGOUT);
 
 extern struct popcommand imap4_commands[];
