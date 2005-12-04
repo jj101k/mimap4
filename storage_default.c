@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include "storage_functions.h"
 
 enum whichUser _default_storage_need_user() {return wuAny;}
@@ -24,7 +25,29 @@ int _default_storage_dump_message_lines(struct imap4_message *message, unsigned 
 	return _storage_dump_fragment(message->header_end_offset, message->body_end_offset, 0, max_lines+1, out);
 }
 
-int _default_storage_lock_mailbox(char const *mailboxname) {
+int _default_storage_use_mailbox(char *mailbox) {
+	return 0;
+}
+
+int _default_storage_lock_folder(char *folder) {
+	return 0;
+}
+
+uint32_t _default_storage_uidvalidity() {
+	/* This is stupid, but it's the best we can do! */
+	return (uint32_t)time(NULL);
+}
+
+char _default_storage_is_readonly() {
+	return 1;
+}
+
+char const *flags[]={NULL};
+char const **_default_storage_available_flags() {
+	return flags;
+}
+
+int _default_storage_select_folder(char *folder, char readonly) {
 	return 0;
 }
 

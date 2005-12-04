@@ -9,6 +9,7 @@ enum imap4_state {st_Dead, st_PreAuth, st_PostAuth, st_Selected, st_Logout, st_E
 enum imap4_state command_loop(FILE *ifp, FILE *ofp, enum imap4_state current_state);
 int handle_connection(FILE *ifp, FILE *ofp);
 int _send_misc(FILE *ofp, char *tag, char *prefix, char *message);
+int _send_printf(FILE *ofp, char *tag, char *message, ...);
 
 #define IMAP4_OK "OK"
 #define IMAP4_BAD "BAD"

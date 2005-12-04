@@ -227,7 +227,7 @@ int _storage_synch() {
 	unsigned long to_read;
 
 	for(current_message=first_message;current_message;current_message=current_message->next) {
-		if(!current_message->deleted) {
+		if(!current_message->flags&BIT(imapFlagDeleted)) {
 			fseek(spoolfp, current_message->header_offset, SEEK_SET);
 			to_read=current_message->body_end_offset-current_message->header_offset;
 			fread(spool_copy+byte_pos, to_read, 1, spoolfp);

@@ -41,19 +41,24 @@ void drop_privs() {
 
 
 #include <stdarg.h>
-int _imap4_fprintf(FILE *out, char const *format, ...) {
-	va_list ap;
+int _imap4_vprintf(FILE *out, char const *format, va_list ap) {
 	int rv;
 	char *buff=malloc(RFC_MAX_OUTPUT_LENGTH+1);
-	va_start(ap, format);
 	rv=vsnprintf(buff, RFC_MAX_OUTPUT_LENGTH+1, format, ap);
-	va_end(ap);
 	if(strlen(buff)<2) {
 		strcat(buff, "\r\n");
 	} else if(strcmp(buff+strlen(buff)-2, "\r\n")!=0) {
 		strcpy(buff+strlen(buff)-2, "\r\n");
 	}
 	fwrite(buff, strlen(buff), 1, out);
+	return rv;
+}
+int _imap4_fprintf(FILE *out, char const *format, ...) {
+	va_list ap;
+	int rv;
+	va_start(ap, format);
+	rv = _imap4_vprintf(out, format, ap);
+	va_end(ap);
 	return rv;
 }
 
@@ -64,6 +69,18 @@ int _send_misc(FILE *ofp, char *tag, char *prefix, char *message) {
 	} else {
 		return _imap4_fprintf(ofp, "%s %s\r\n", tag, prefix);
 	}
+}
+
+int _send_printf(FILE *ofp, char *tag, char *format, ...) {
+	va_list ap;
+	int rv;
+	if(!tag) tag=IMAP4_DEFAULT_TAG;
+	fwrite(tag, sizeof(char), strlen(tag), ofp);
+	fwrite(" ", sizeof(char), 1, ofp);
+	va_start(ap, format);
+	rv = _imap4_vprintf(ofp, format, ap);
+	va_end(ap);
+	return rv;
 }
 
 int grep_equal(char *input, char *compare[]) {

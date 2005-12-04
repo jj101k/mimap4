@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+enum imapCoreFlags {imapFlagRecent=1, imapFlagDeleted=2};
+
 struct imap4_message {
 	struct imap4_message * next;
 	char *uidl;
@@ -15,7 +17,8 @@ struct imap4_message {
 	// ...and where the body (ie, whole message) ends.
 	unsigned long int body_end_offset;
 	// A count of how many lines in this message match /^\./, which you may find useful
-	char deleted;
+	unsigned long int flags;
+	char **extra_flags;
 };
 
 enum arrayStyle {asArray, asLinkedList};

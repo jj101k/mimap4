@@ -31,6 +31,7 @@ struct popcommand imap4_commands[]={
 	{"AUTHENTICATE",imap4_AUTHENTICATE, 		1,1, BIT(st_PreAuth), 									NULL, 								NULL					},
 
 	{"NOOP",imap4_NOOP, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
+	{"SELECT",imap4_SELECT, 			1,1, BIT(st_PostAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 	{"CAPABILITY",imap4_CAPABILITY, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 
 	{"LOGOUT",imap4_LOGOUT, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), NULL, 									NULL					},
@@ -48,7 +49,6 @@ struct imap4_message * valid_message(unsigned long int index) {
 		return NULL;
 	}
 	message=_storage_message_number(index);
-	if((!message) || message->deleted) return NULL;
 	return message;
 }
 
@@ -72,6 +72,7 @@ struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[
 		if(_auth_login_delay_needed(argv[1])) {
 			return imap4_rv_edelay; // delayed
 		} else {
+			_storage_use_mailbox(mailbox);
 			if(_storage_need_user()==wuMailbox) {
 				if(!drop_privs_to_user(mailbox)) drop_privs();
 			} else {
@@ -82,6 +83,59 @@ struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[
 		}
 	} else {
 		return imap4_rv_ebadlogin; // invalid
+	}
+}
+
+/*
+ * struct imap4_command_rv imap4_SELECT(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
+ *
+ * Syntax: SELECT <folder>
+ *
+ * Tries to access a folder in the mailbox. This can fail for a few reasons. Returns a bunch of untagged responses.
+ *
+ */
+struct imap4_command_rv imap4_SELECT(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+	if(_storage_select_folder(argv[1], 0)) {
+	
+        unsigned long int message_count=0;
+        unsigned long int message_recent_count=0;
+        struct imap4_message *current_message;
+        unsigned long int i;
+
+        if(_storage_array_style()==asArray) {
+                message_count=_storage_message_count();
+                for(i=0, current_message=_storage_first_message();i<message_count;i++, current_message++) {
+                        if(current_message->flags&BIT(imapFlagRecent)) {
+                                message_recent_count++;
+                        }
+                }
+        } else {
+                for(current_message=_storage_first_message();current_message;current_message=current_message->next) {
+                        if(!current_message->flags&BIT(imapFlagRecent)) {
+                                message_recent_count++;
+                        }
+                        message_count++;
+                }
+        }
+
+		_send_printf(ofp, NULL, "%lu EXISTS", message_count);
+		_send_printf(ofp, NULL, "%lu RECENT", message_recent_count);
+		char flag_list[1024];
+		strlcpy(flag_list, "\\Answered \\Flagged \\Deleted \\Seen \\Draft", sizeof(flag_list));
+		char const **other_flags = _storage_available_flags();
+		if(other_flags) {
+			int i;
+			for(i=0;other_flags[i];i++) {
+				if(!other_flags[i][0]) continue; /* You deserve to suffer if you do this though */
+				strlcat(flag_list, " ", sizeof(" "));
+				strlcat(flag_list, other_flags[i], sizeof(flag_list));
+			}
+		}
+		_send_printf(ofp, NULL, "FLAGS (%s)", flag_list);
+		_send_printf(ofp, NULL, IMAP4_OK " [UIDVALIDITY %lu]", _storage_uidvalidity());
+		return adhoc_command_rv(IMAP4_OK, 0, "SELECT completed", _storage_is_readonly()?"READ-ONLY":"READ-WRITE");
+	} else {
+		return adhoc_command_rv(IMAP4_NO, 0, "SELECT can't open folder", NULL);
 	}
 }
 

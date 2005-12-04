@@ -32,9 +32,14 @@ int auth_hookup(void *dlhandle) {
 }
 
 enum arrayStyle (*_storage_array_style)();
-int (*_storage_lock_mailbox)(char const *mailbox);
+int (*_storage_use_mailbox)(char const *mailbox);
+int (*_storage_lock_folder)(char const *folder);
+int (*_storage_select_folder)(char const *folder, char readonly);
+char (*_storage_is_readonly)();
+char const ** (*_storage_available_flags)();
 unsigned long int (*_storage_message_count)();
 unsigned long int (*_storage_message_sum)();
+uint32_t (*_storage_uidvalidity)();
 struct imap4_message *(*_storage_first_message)();
 struct imap4_message *(*_storage_message_number)(unsigned long int);
 int (*_storage_uidl_supported)();
@@ -47,7 +52,12 @@ enum whichUser (*_storage_need_user)() ;
 
 int storage_hookup(void *dlhandle) {
 	LOAD_MISC_FUNC(_storage_array_style);
-	LOAD_MISC_FUNC(_storage_lock_mailbox);
+	LOAD_MISC_FUNC(_storage_uidvalidity);
+	LOAD_MISC_FUNC(_storage_is_readonly);
+	LOAD_MISC_FUNC(_storage_available_flags);
+	LOAD_MISC_FUNC(_storage_use_mailbox);
+	LOAD_MISC_FUNC(_storage_lock_folder);
+	LOAD_MISC_FUNC(_storage_select_folder);
 	LOAD_MISC_FUNC(_storage_message_count);
 	LOAD_MISC_FUNC(_storage_message_sum);
 	LOAD_MISC_FUNC(_storage_first_message);

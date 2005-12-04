@@ -2,14 +2,93 @@
 #define __storage_functions_h
 
 #include <stdlib.h>
+#include <stdint.h>
 #include "storage.h"
 
 /*
- * int _storage_lock_mailbox(char const *)
+ * uint32_t (*_storage_uidvalidity)()
  *
- * Open and lock the mailbox. Return 1 if successful, 0 (locked?) otherwise.
+ * The current folder's UIDVALIDITY value. This is a magic number which purely
+ * serves to tell that this is the same folder. If it gets deleted and recreated,
+ * or if there's ANY DOUBT the number should always be higher than it's 
+ * previously been.
+ *
+ * On UNIXy systems, a timestamp is usually okay for this, but each folder must
+ * have a distinct value for this, so that IMAP clients can always look up
+ * cached data for message (uidvalidty . uid).
+ *
+ * This number MUST NOT be zero.
  */
-extern int (*_storage_lock_mailbox)(char const *mailbox);
+
+extern uint32_t (*_storage_uidvalidity)();
+
+/*
+ * char const ** (*_storage_available_flags)()
+ *
+ * The available flags for the current folder. A NULL-terminated array of strings.
+ *
+ * You don't have to account for the flags: \Deleted, \Seen, \Answered,
+ * \Flagged, \Draft, \Recent. Everything else you do.
+ *
+ * Note that \Recent can't be set by the client anyway.
+ *
+ * Normal response: (char const **){NULL}
+ */
+
+extern char const ** (*_storage_available_flags)(); 
+
+/*
+ * int _storage_use_mailbox(char const *)
+ *
+ * Notifies the storage module we'll be using. The return value is NOT currently
+ * checked, but should be 1 for success, 0 for failure.
+ *
+ * See also _storage_select_folder()
+ */
+extern int (*_storage_use_mailbox)(char const *mailbox);
+
+/*
+ * int _storage_lock_folder(char const *)
+ *
+ * Lock the folder in preparation for writing. Return 1 if successful, 0 (no such folder) otherwise.
+ *
+ * Notes: 
+ * - this function is allowed to sleep as long as it needs to to get
+ * the lock.
+ * - this might not be the currently selected folder (we also lock for COPY)
+ */
+extern int (*_storage_lock_folder)(char const *folder);
+
+/*
+ * int _storage_select_folder(char const *, char)
+ *
+ * Prepare to read from a folder. 'readonly' is for information only - the
+ * actual enforcement is done in the main program.
+ *
+ * Return 1 on success (ie, that _storage_folder_metadata() will work), or 0
+ * to indicate that the folder cannot be opened (in this mode, at least).
+ *
+ * Note that this is where you should let the program know that the mailbox
+ * itself is inaccessible.
+ *
+ * IMPORTANT: See also _storage_is_readonly() regarding read-only support
+ */
+extern int (*_storage_select_folder)(char const *folder, char readonly);
+
+
+/*
+ * char _storage_is_readonly()
+ *
+ * Say whether the currently SELECTed or EXAMINEd folder is actually read-only.
+ * Note that THERE IS A DIFFERENCE between requested-RW-got-RO and requested-RO.
+ *
+ * The IMAP4rev1 spec says that requested-RW-got-RO means that "per-user changes
+ * to the permanent state" may be possible, which effectively seems to mean that
+ * you may be able to twiddle (some of) the knobs on the messages, but you can't
+ * add (COPY) any. The example given seems to suggest "deleting" messages from
+ * your view of an NNTP newsgroup might be an application of this.
+ */
+extern char (*_storage_is_readonly)();
 
 /*
  * enum arrayStyle _storage_array_style()
