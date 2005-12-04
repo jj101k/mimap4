@@ -28,6 +28,7 @@ struct imap4_command_rv
 /* Name		Symbol			Args(min,max)		States														Valid after failure			Valid after success */
 struct popcommand imap4_commands[]={
 	{"LOGIN",imap4_LOGIN, 		2,2, BIT(st_PreAuth), 									NULL, 								NULL					},
+	{"AUTHENTICATE",imap4_AUTHENTICATE, 		1,1, BIT(st_PreAuth), 									NULL, 								NULL					},
 
 	{"NOOP",imap4_NOOP, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
 	{"CAPABILITY",imap4_CAPABILITY, 			0,0, BIT(st_PostAuth)|BIT(st_PreAuth)|BIT(st_Selected), 											NULL, 									NULL					},
@@ -83,6 +84,19 @@ struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[
 		return imap4_rv_ebadlogin; // invalid
 	}
 }
+
+/*
+ * struct imap4_command_rv imap4_AUTHENTICATE(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
+ *
+ * Syntax: AUTHENTICATE <mechanism> ...
+ *
+ * Starts a challenge-response style authentication with the client. 
+ *
+ */
+struct imap4_command_rv imap4_AUTHENTICATE(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+	return adhoc_command_rv(IMAP4_NO, 0, "AUTHENTICATE bad mechanism", NULL);
+}
+
 
 /*
  * struct imap4_command_rv imap4_NOOP(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp)
