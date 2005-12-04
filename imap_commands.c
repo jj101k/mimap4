@@ -54,6 +54,9 @@ struct imap4_message * valid_message(unsigned long int index) {
 	return message;
 }
 
+#define adhoc_command_rv(response_type, response_already_sent, extra_string, extended_error_code) \
+	((struct imap4_command_rv) {response_type, response_already_sent, extra_string, extended_error_code})
+
 /*
  * struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp)
  *
@@ -91,10 +94,8 @@ struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[
  *
  * Does nothing. Elicits a successful response unless the world has ended.
  */
-struct imap4_command_rv imap4_rv_noop={IMAP4_OK, 0, S_NOOP, NULL};
-
 struct imap4_command_rv imap4_NOOP(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
-	return imap4_rv_noop;
+	return adhoc_command_rv(IMAP4_OK, 0, S_NOOP, NULL);;
 }
 
 /*
@@ -104,12 +105,11 @@ struct imap4_command_rv imap4_NOOP(const char const *tag, int argc, char *argv[]
  *
  * Tells the user what this server can do.
  */
-struct imap4_command_rv imap4_rv_capability={IMAP4_OK, 0, "CAPABILITY completed", NULL};
 char *capabilities="IMAP4rev1";
 
 struct imap4_command_rv imap4_CAPABILITY(const char const *tag, int argc, char *argv[], enum imap4_state *unused2, FILE *ifp, FILE *ofp) {
 	_send_misc(ofp, NULL, "CAPABILITY", capabilities);
-	return imap4_rv_capability;
+	return adhoc_command_rv(IMAP4_OK, 0, "CAPABILITY completed", NULL);;
 }
 
 
@@ -120,10 +120,9 @@ struct imap4_command_rv imap4_CAPABILITY(const char const *tag, int argc, char *
  *
  * Logs you out, deleting all messages you've marked for deletion.
  */
-struct imap4_command_rv imap4_rv_logout={IMAP4_BYE, 0, S_LOGOUT, NULL};
-
 struct imap4_command_rv imap4_LOGOUT(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
+	_send_misc(ofp, NULL, "BYE", S_LOGOUT);
 	*current_state=st_Logout;
-	return imap4_rv_logout;
+	return adhoc_command_rv(IMAP4_OK, 0, "LOGOUT completed", NULL);;
 }
 
