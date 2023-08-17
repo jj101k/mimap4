@@ -1,6 +1,6 @@
-AC_INIT(mimap4, 0.16)
+AC_INIT([mimap4],[0.16])
 AC_ARG_WITH(safe-user,
-	AC_HELP_STRING([--with-safe-user=ARG], [SU to this user if you're root [[ARG=mail]]]),
+	AS_HELP_STRING([--with-safe-user=ARG],[SU to this user if you're root [[ARG=mail]]]),
 	[
 		AC_DEFINE_UNQUOTED(SAFE_USER, "$withval")
 	],
@@ -21,7 +21,7 @@ if( !pwd || !(pwd->pw_uid) || !(pwd->pw_gid) ) return 1;
 [ AC_MSG_FAILURE([Bad fallback username, please use --with-safe-user=someuser]) ])
 WITH_OPENSSL=1
 AC_ARG_WITH(openssl,
-	AC_HELP_STRING([--without-openssl],[Don't openssl md5/rand functions]),
+	AS_HELP_STRING([--without-openssl],[Don't openssl md5/rand functions]),
 	[
 		if test "x$withval" == "xno" ; then
 			WITH_OPENSSL=0
@@ -29,7 +29,7 @@ AC_ARG_WITH(openssl,
 	]
 )
 AC_ARG_WITH(rendezvous,
-	AC_HELP_STRING([--with-rendezvous],[Use rendezvous (apple zeroconf)]),
+	AS_HELP_STRING([--with-rendezvous],[Use rendezvous (apple zeroconf)]),
 	[
 		if test "x$withval" != "xno" ; then
 			AC_DEFINE(USE_RENDEZVOUS,1)
@@ -38,7 +38,7 @@ AC_ARG_WITH(rendezvous,
 	]
 )
 AC_ARG_WITH(bonjour,
-	AC_HELP_STRING([--with-bonjour],[Use rendezvous (apple zeroconf)]),
+	AS_HELP_STRING([--with-bonjour],[Use rendezvous (apple zeroconf)]),
 	[
 		if test "x$withval" != "xno" ; then
 			AC_DEFINE(USE_RENDEZVOUS,1)
