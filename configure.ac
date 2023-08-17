@@ -1,4 +1,4 @@
-AC_INIT([mimap4],[0.16])
+AC_INIT([mimap4],[0.17])
 AC_ARG_WITH(safe-user,
 	AS_HELP_STRING([--with-safe-user=ARG],[SU to this user if you're root [[ARG=mail]]]),
 	[
