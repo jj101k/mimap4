@@ -9,7 +9,7 @@
 #define ABSOLUTE_MAX_USERNAME_LENGTH 1024
 
 
-#ifdef USE_OPENSSL
+#if USE_OPENSSL
 #include <openssl/evp.h>
 #endif
 
@@ -62,7 +62,7 @@ struct imap4_message * valid_message(unsigned long int index) {
  *
  * Syntax: LOGIN <user name> <password>
  *
- * Logs the user in. 
+ * Logs the user in.
  *
  */
 struct imap4_command_rv imap4_LOGIN(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
@@ -104,7 +104,7 @@ struct imap4_command_rv imap4_SELECT(const char const *tag, int argc, char *argv
 	}
 	command_name[i]=0;
 	if(_storage_select_folder(argv[1], (!strcmp(command_name, "SELECT"))?0:1)) {
-	
+
         unsigned long int message_count=0;
         unsigned long int message_recent_count=0;
         struct imap4_message *current_message;
@@ -153,7 +153,7 @@ struct imap4_command_rv imap4_SELECT(const char const *tag, int argc, char *argv
  *
  * Syntax: AUTHENTICATE <mechanism> ...
  *
- * Starts a challenge-response style authentication with the client. 
+ * Starts a challenge-response style authentication with the client.
  *
  */
 struct imap4_command_rv imap4_AUTHENTICATE(const char const *tag, int argc, char *argv[], enum imap4_state *current_state, FILE *ifp, FILE *ofp) {
