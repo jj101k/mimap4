@@ -9,3 +9,7 @@ module.mk
 spools/test
 mimap4
 .gdb_history
+*.o
+*.bundle
+*.so
+*~
