@@ -12,9 +12,9 @@ AC_LANG(C)
 AC_RUN_IFELSE([
 	AC_LANG_PROGRAM([[
 #include <pwd.h>
-]], [[ 
+]], [[
 struct passwd *pwd=getpwnam(SAFE_USER);
-if( !pwd || !(pwd->pw_uid) || !(pwd->pw_gid) ) return 1; 
+if( !pwd || !(pwd->pw_uid) || !(pwd->pw_gid) ) return 1;
 ]])
 ],
 [],
@@ -66,7 +66,7 @@ extra_modules=""
 AC_CHECK_HEADERS([dns_sd.h], [], [AC_DEFINE(USE_RENDEZVOUS,0)])
 AC_CHECK_HEADERS([libpq-fe.h], [extra_modules="$extra_modules auth_postgresql"], [])
 AC_SUBST(extra_modules)
-AC_PROG_LEX
+AC_PROG_LEX(noyywrap)
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_AWK
