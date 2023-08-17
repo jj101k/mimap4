@@ -55,13 +55,20 @@ AC_CHECK_LIB(crypto, EVP_DigestInit, [
 	AC_DEFINE(USE_OPENSSL,0)
 ])
 
-AC_CHECK_FILE(/usr/lib/libc.dylib, [
+
+OLD_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS -bundle"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
+	return 1;
+]])],[
 	AC_SUBST(SHARED_EXT,".bundle")
 	AC_SUBST(MAKE_SHARED,"-bundle")
-], [
+],[
 	AC_SUBST(SHARED_EXT,".so")
 	AC_SUBST(MAKE_SHARED,"-shared")
 ])
+CFLAGS=$OLD_CFLAGS
+
 extra_modules=""
 AC_CHECK_HEADERS([dns_sd.h], [], [AC_DEFINE(USE_RENDEZVOUS,0)])
 AC_CHECK_HEADERS([libpq-fe.h], [extra_modules="$extra_modules auth_postgresql"], [])
